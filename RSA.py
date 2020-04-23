@@ -1,7 +1,8 @@
 import random
 from math import sqrt 
 
-def findInverse(n1, n2):
+def findInverse(n2, n1):
+    tempMod = n1
     r, q = (n1 % n2, n1 // n2)
     a1, b1, a2, b2 = (1, 0, 0, 1)
     while r != 0:
@@ -14,7 +15,7 @@ def findInverse(n1, n2):
         r, q = (n1 % n2, n1 // n2)
     if n2 != 1 :
         return "GCD not equal 1"
-    return b2
+    return b2 % tempMod
 
 def gcd(a, b):
     while a != 0:
@@ -59,14 +60,6 @@ def primeFactors(s, n):
     if n > 2:
         s.add(n)
 
-def findGenerator(alpha, p):
-    if lehmann(p, 100) == False:
-        return -1
-    
-    if fexpo(alpha, (p - 1)//2, p) != 1:
-        return alpha
-    else: 
-        return -alpha % p
 
 def findSmallestGenerator(n):
     s = set()
@@ -107,7 +100,7 @@ def generateKey(keysize):
         if gcd(e, m) == 1:
             break
     
-    d = findInverse(m, e)
+    d = findInverse(e, m)
     publicKey = (n, e)
     privateKey = (n, d)
    
@@ -117,6 +110,53 @@ def generateKey(keysize):
 # print("generate publicKey ", publicKey)
 # print("generate privateKey ", privateKey)
 
-f = open("original.txt", "w+")
+def genP(n, file):
+    f = open(file, "rb")
+    byte = f.read()
+    readByte = n // 8
 
-print(f)
+    skipZero = 0
+    while byte[skipZero] == 0:
+        skipZero += 1
+    i = skipZero
+
+    bitString = ''.join(format(i, '08b') for i in byte[skipZero:(skipZero+readByte+2)])
+
+    startPos = 0
+    for i in range(0, len(bitString)): 
+        if bitString[i] == '1': 
+            startPos = i + 1
+            break
+
+    bitString = bitString[(startPos - 1):n + (startPos - 1)]
+    decimal = int(bitString, 2)
+
+    if decimal >= 2**(n-1) or decimal <= 2**n:
+        while True:
+            if lehmann(decimal, 1000):
+                return decimal
+            decimal += 1
+    else:
+        return -1
+
+def getGenerator(alpha, p):
+    if lehmann(p, 1000) == False:
+        return -1
+    
+    if fexpo(alpha, (p - 1)//2, p) != 1:
+        return alpha
+    else: 
+        return -alpha % p
+
+def findGenerator(p):
+    s = set()
+
+    while len(s) <= 2:
+        alpha = random.randrange(2, p-1)
+        g = getGenerator(alpha, p)
+        s.add(g)
+    
+    return s
+
+print(genP(18,"original.txt"))
+print(findGenerator(genP(18,"original.txt")))
