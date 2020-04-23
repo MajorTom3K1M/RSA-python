@@ -1,7 +1,7 @@
 import random
 from math import sqrt 
 
-def egcd(n1, n2):
+def findInverse(n1, n2):
     r, q = (n1 % n2, n1 // n2)
     a1, b1, a2, b2 = (1, 0, 0, 1)
     while r != 0:
@@ -107,7 +107,7 @@ def generateKey(keysize):
         if gcd(e, m) == 1:
             break
     
-    d = egcd(m, e)
+    d = findInverse(m, e)
     publicKey = (n, e)
     privateKey = (n, d)
    
