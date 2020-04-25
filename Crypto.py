@@ -1,5 +1,4 @@
 import random
-from math import sqrt 
 
 def gcd(a, b):
     while a != 0:
