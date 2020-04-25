@@ -7,6 +7,9 @@ def gcd(a, b):
     return b
 
 def FindInverse(n2, n1):
+    if gcd(n1, n2) != 1:
+        raise Exception("GCD of {} and {} aren't equal 1 so it don't have Inverse".format(n1, n2))
+
     tempMod = n1
     r, q = (n1 % n2, n1 // n2)
     a1, b1, a2, b2 = (1, 0, 0, 1)
@@ -49,6 +52,7 @@ def isPrime(n, t):
             return False # Not Prime
     return True # Prime
 
+# RSA Key Generator
 def generateLargePrime(keysize):
     while True:
         num = random.randrange(2**(keysize-1),2**(keysize))
@@ -107,8 +111,11 @@ def GenP(n, file):
 
 def getGenerator(alpha, p):
     if isPrime(p, 1000) == False:
-        return -1
-    
+        raise Exception('To get generator of Zp P must be Prime')
+
+    # if isPrime((p - 1)//2, 1000) == False:
+    #     return -1
+
     if FastExponential(alpha, (p - 1)//2, p) != 1:
         return alpha
     else: 
@@ -118,6 +125,7 @@ def FindGenerator(p):
     s = set()
 
     while len(s) <= 2:
+        # alpha not equal to +-1 mod p
         alpha = random.randrange(2, p-1)
         g = getGenerator(alpha, p)
         s.add(g)
@@ -167,23 +175,52 @@ def ElgamalDecrypt(cipherText, privateKey, p):
     # x = b * FindInverse(FastExponential(a,privateKey,p), p) % p
     return x
 
-# Bob
-plainText = "Hello How Are You"
+while True:
+    print('Please Select')
+    print('1.Generate Prime')
+    print('2.Find Inverse')
+    print('3.Find Generator')
+    print('4.Elgamal')
+    print('5.Exit')
 
-publicKey, privateKey = ElgamalKeyGenerator(120,"original.txt")
-cipherText, p = ElgamalEncrypt(plainText, publicKey)
+    choice = input('Input : ')
+    if choice == '1':
+        keySize = input('Key Size :')
+        file = input('File :')
+        g = GenP(int(keySize), file)
+        print('Prime is ', g)
+    elif choice == '2':
+        value = input('Value : ')
+        mod = input('Mod With : ')
+        inverse = FindInverse(int(value),int(mod))
+        print('Inverse of {} % {} is {}'.format(value,mod,inverse))
+    elif choice == '3':
+        prime = input('Prime Value : ')
+        g = FindGenerator(int(prime))
+        print('Generator is ', g)
+    elif choice == '4':
+        # Bob
+        plainText = input('Plaintext : ')
+        keySize = input('KeySize : ')
+        file = input('File to read and gen key : ')
+        publicKey, privateKey = ElgamalKeyGenerator(int(keySize),file)
+        cipherText, p = ElgamalEncrypt(plainText, publicKey)
 
-# Alice
-plainText = ElgamalDecrypt(cipherText, privateKey, p)
+        # Alice
+        plainText = ElgamalDecrypt(cipherText, privateKey, p)
 
-print('Public Key', publicKey)
-print('Private Key', privateKey)
-print('Ciphertext',cipherText)
-print('Plaintext',plainText)
+        print('Public Key', publicKey)
+        print('Private Key', privateKey)
+        print('Ciphertext', cipherText)
+        print('Plaintext', plainText)
 
-# To String
-decryptString = ""
-for i in range(len(plainText)):
-    decryptString += chr(plainText[i])
+        # To String
+        decryptString = ""
+        for i in range(len(plainText)):
+            decryptString += chr(plainText[i])
 
-print('To String:',decryptString)
+        print('To String:',decryptString)
+    elif choice == '5':
+        break
+    else:
+        continue
