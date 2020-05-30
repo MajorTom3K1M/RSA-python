@@ -36,10 +36,20 @@ def FastExponential(base, expo, mod):
             result = (base * result) % mod
     return result
 
+def power(a, b):
+    result = 1
+    while b >= 0:
+        result = result * a
+        b -= 1
+    return result
+
 # Lehmann Test
 def isPrime(n, t):
     a = random.randint(2, n-1)
     expo = (n-1)//2
+
+    if n % 2 == 0:
+        return False
 
     while t>0:
         result = FastExponential(a,expo,n)
@@ -100,7 +110,8 @@ def GenP(n, file):
     bitString = bitString[(startPos - 1):n + (startPos - 1)]
     decimal = int(bitString, 2)
 
-    if decimal >= 2**(n-1) or decimal <= 2**n:
+    # if decimal >= 2**(n-1) or decimal <= 2**n:
+    if decimal >= power(2, n-1) or decimal <= power(2,n):
         while True:
             if isPrime(decimal, 1000):
                 return decimal
@@ -112,8 +123,8 @@ def getGenerator(alpha, p):
     if isPrime(p, 1000) == False:
         raise Exception('To get generator of Zp P must be Prime')
 
-    # if isPrime((p - 1)//2, 1000) == False:
-    #     return -1
+    if isPrime((p - 1)//2, 1000) == False:
+        raise Exception('(p - 1)/2 is Not Safe Prime')
 
     if FastExponential(alpha, (p - 1)//2, p) != 1:
         return alpha
@@ -125,7 +136,7 @@ def FindGenerator(p):
 
     while len(s) <= 2:
         # alpha not equal to +-1 mod p
-        alpha = random.randrange(2, p-1)
+        alpha = random.randrange(2, p-2)
         g = getGenerator(alpha, p)
         s.add(g)
     
