@@ -180,7 +180,9 @@ while True:
     print('2.Find Inverse')
     print('3.Find Generator')
     print('4.Elgamal')
-    print('5.Exit')
+    print('5.Elgamal Encrypt')
+    print('6.Elgamal Decrypt')
+    print('7.Exit')
 
     choice = input('Input : ')
     if choice == '1':
@@ -220,6 +222,54 @@ while True:
 
         print('To String:',decryptString)
     elif choice == '5':
+        fname = input('File to encrypt : ')
+        f = open(fname, 'rb')
+        enc = f.read().decode()
+        keySize = input('KeySize : ')
+        file = input('File to read and gen key : ')
+        publicKey, privateKey = ElgamalKeyGenerator(int(keySize),file)
+        f = open(f'{fname}.key', 'w')
+        f.write(hex(privateKey)[2:])
+        f = open(f'{fname}.pub', 'w')
+        f.write(','.join(hex(x)[2:] for x in publicKey))
+        cipherText, p = ElgamalEncrypt(enc, publicKey)
+        f = open(f'{fname}.enc', 'w')
+        a = cipherText[0]
+        b = cipherText[1]
+        f.write(hex(a)[2:])
+        f.write(',')
+        f.write(','.join(hex(x)[2:] for x in b))
+        f.write(',')
+        f.write(hex(p)[2:])
+        f.close()
+    elif choice == '6':
+        privateKeyf = input('Private key file: ')
+        cipherTextf = input('Ciphertext file: ')
+
+        f = open(privateKeyf, 'r')
+        privateKeyhex = f.read()
+        privateKey = int(privateKeyhex, 16)
+        f = open(cipherTextf, 'r')
+        cipherTextdump = f.read()
+        cipherTextlist = cipherTextdump.split(',')
+        a = int(cipherTextlist[0], 16)
+        b = []
+        bdump = cipherTextlist[1:-1]
+        for i in bdump:
+          b.append(int(i,16))
+        p = int(cipherTextlist[-1], 16)
+        cipherText = (a, b)
+
+        plainText = ElgamalDecrypt(cipherText, privateKey, p)
+        # To String
+        decryptString = ""
+        for i in range(len(plainText)):
+            decryptString += chr(plainText[i])
+        newfile = cipherTextf.split('enc')[0]
+        f = open(f'{newfile}dec', 'w')
+        f.write(decryptString)
+        f.close()
+    elif choice == '7':
         break
     else:
         continue
