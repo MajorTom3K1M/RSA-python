@@ -272,6 +272,13 @@ def RWHash(k,p,M):
     l = 0
     while len(blockString) > 0:
         block = blockString[:k-1]
+
+        #Padding By Last Block
+        if len(block) != k-1:
+            while len(block) != k-1:
+                block.append(block[-1])
+                # print(block)
+
         binaryBlock = ''.join(block)
         if isFirstRound:
             binaryBlock = format(alpha, 'b') + binaryBlock
